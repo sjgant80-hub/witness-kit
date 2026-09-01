@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>witness-kit — wire a mutation gate, honestly</title>
+<meta name="description" content="Paste your repo's file listing; get one of three honest answers: a pinned verdict-reading gate, the discipline your existing mutator is missing, or a named refusal where a gate would be theatre.">
+<style>
+:root{
+  --bg:#0b0e0c; --ink:#e7efe9; --muted:#8fa397; --accent:#84cc16; --accent-2:#a3e635;
+  --card:#121712; --line:#26302a; --mono-bg:#141a15; --bad:#f87171; --warn:#fbbf24;
+}
+@media (prefers-color-scheme: light){:root{
+  --bg:#f8faf7; --ink:#161d17; --muted:#5c6e61; --accent:#4d7c0f; --accent-2:#65a30d;
+  --card:#ffffff; --line:#dfe8dd; --mono-bg:#eef3ec; --bad:#b91c1c; --warn:#b45309;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.banner{background:var(--accent);color:var(--bg);font:600 11.5px/1.4 system-ui;letter-spacing:.14em;text-transform:uppercase;padding:9px 18px;text-align:center}
+main{max-width:76ch;margin:0 auto;padding:30px 18px 60px}
+h1{font:800 2.1rem/1.12 system-ui;margin:.3em 0 .1em;letter-spacing:-.02em}
+h1 em{color:var(--accent);font-style:normal}
+h2{font:700 1.08rem/1.3 system-ui;margin:2em 0 .5em;color:var(--accent)}
+.kicker{font:600 12px/1.5 system-ui;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.lede{font-size:1.05rem;color:var(--muted)}
+a{color:var(--accent-2)}
+code{font:13px/1.6 ui-monospace,Consolas,monospace;background:var(--mono-bg);border-radius:4px;padding:1px 5px}
+.law{background:var(--mono-bg);border-left:3px solid var(--accent);border-radius:6px;padding:12px 16px;font:13px/1.7 ui-monospace,Consolas,monospace;overflow-x:auto;white-space:pre-wrap}
+.demo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:1.2em 0}
+.demo h3{margin:0 0 4px;font:600 .98rem system-ui;color:var(--accent)}
+.demo p{font-size:13px;color:var(--muted);margin:.3em 0 .9em}
+button{font:600 13px system-ui;background:var(--accent);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;cursor:pointer;margin-right:6px}
+button:hover{background:var(--accent-2)}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+textarea{width:100%;min-height:120px;font:12.5px/1.5 ui-monospace,Consolas,monospace;background:var(--mono-bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+label{display:flex;gap:6px;align-items:center;font:13px system-ui;color:var(--muted);margin:8px 0}
+.out{font:12.5px/1.65 ui-monospace,Consolas,monospace;background:var(--mono-bg);border-radius:8px;padding:10px 12px;margin-top:10px;overflow-x:auto;min-height:1.4em;white-space:pre-wrap}
+footer{border-top:1px solid var(--line);margin-top:44px;padding-top:16px;font:12px/1.7 system-ui;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="banner">the wiring law · witness 40/44 + 4 argued, CLEAN · it eats its own cooking</div>
+<main>
+<p class="kicker">witness-kit · for any team that ships tests</p>
+<h1>Wire a mutation gate — <em>honestly</em></h1>
+<p class="lede">A green suite proves your tests ran. A clean mutation gate proves your tests would
+<strong>notice if the code were wrong</strong>. This kit wires that proof into your CI with three
+rules earned across a hundred gated repos: <em>pin the gate · read the verdict · kill or argue,
+never shrug</em> — and it refuses to wire anything where the proof would be theatre.</p>
+
+<h2>The three honest answers</h2>
+<div class="law">LANE A    kernel/test pairs found → each proven CLEAN locally with the EXACT pinned
+          invocation → a workflow that tees every verdict and greps '"clean": true' —
+          anything less fails the build. You review, you push.
+LANE B    you already mutate (Stryker & co) → belief installed; the missing piece is
+          discipline: pin the tool, set a breaking threshold, make CI READ the score.
+          A gate that reports and exits zero is decorative.
+THEATRE   nothing to mutate, no mutator → REFUSED, with directions: extract one pure
+          function with a falsifiable test first. The gate follows the kernel.</div>
+
+<div class="demo">
+<h3>Try the law on your repo — right here</h3>
+<p>Paste the output of <code>git ls-files</code> (nothing uploads — the kernel runs in this page).
+Tick ESM if your package.json says <code>"type": "module"</code>.</p>
+<textarea id="listing" spellcheck="false" placeholder="README.md
+src/parser.mjs
+src/parser.test.mjs
+stryker.config.json
+…"></textarea>
+<label><input type="checkbox" id="esm" style="width:auto"> this repo is ESM ("type": "module")</label>
+<div>
+<button id="planBtn">detect + plan</button>
+<button id="wfBtn" class="ghost">preview the workflow</button>
+</div>
+<div class="out" id="planOut">the plan will speak here</div>
+</div>
+
+<h2>Then wire it for real</h2>
+<div class="law">git clone https://github.com/sjgant80-hub/witness-kit
+node witness-kit/wire.mjs /path/to/your/repo</div>
+<p>The wire proves every pair against the pinned invocation <em>before</em> writing a workflow —
+a gate is never shipped on a local approximation. Survivors block it: kill each at source, or
+argue it in a baseline with a sentence a reviewer could dispute. Your repo, your push.</p>
+
+<footer>
+<p>The kit's own kernel is mutation-gated (40/44 killed + 4 argued equivalents, the arguments in
+the baseline). Built on the Konomi architecture, created by Thomas Frumkin. MIT.</p>
+</footer>
+</main>
+<script>
+/*__KERNEL_START__*/
+/*__KERNEL_END__*/
+(function(){
+  const K=window.KIT;
+  const read=()=>{
+    const files=document.getElementById('listing').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    return {files, esm:document.getElementById('esm').checked};
+  };
+  document.getElementById('planBtn').addEventListener('click',()=>{
+    const {files,esm}=read();
+    const d=K.detect(files,esm);
+    const out=document.getElementById('planOut');
+    if(!d.ok){out.textContent='REFUSED: '+d.why;return}
+    const p=K.plan(d);
+    out.textContent=(p.say||('THEATRE — '+p.why))+
+      (p.notes&&p.notes.length?'\n\n'+p.notes.map(n=>'  · '+n).join('\n'):'')+
+      '\n\npairs: '+(d.pairs.map(x=>x.kernel).join(', ')||'—')+
+      (d.mutators.length?'\nexisting mutator: '+d.mutators.join(', '):'');
+  });
+  document.getElementById('wfBtn').addEventListener('click',()=>{
+    const {files,esm}=read();
+    const d=K.detect(files,esm);
+    const out=document.getElementById('planOut');
+    if(!d.ok){out.textContent='REFUSED: '+d.why;return}
+    const w=K.workflowFor(d.pairs);
+    out.textContent=w.ok?w.yml:'REFUSED: '+w.why;
+  });
+})();
+</script>
+</body>
+</html>

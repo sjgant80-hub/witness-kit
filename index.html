@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>witness-kit — wire a mutation gate, honestly</title>
+<meta name="description" content="Paste your repo's file listing; get one of three honest answers: a pinned verdict-reading gate, the discipline your existing mutator is missing, or a named refusal where a gate would be theatre.">
+<style>
+:root{
+  --bg:#0b0e0c; --ink:#e7efe9; --muted:#8fa397; --accent:#84cc16; --accent-2:#a3e635;
+  --card:#121712; --line:#26302a; --mono-bg:#141a15; --bad:#f87171; --warn:#fbbf24;
+}
+@media (prefers-color-scheme: light){:root{
+  --bg:#f8faf7; --ink:#161d17; --muted:#5c6e61; --accent:#4d7c0f; --accent-2:#65a30d;
+  --card:#ffffff; --line:#dfe8dd; --mono-bg:#eef3ec; --bad:#b91c1c; --warn:#b45309;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.banner{background:var(--accent);color:var(--bg);font:600 11.5px/1.4 system-ui;letter-spacing:.14em;text-transform:uppercase;padding:9px 18px;text-align:center}
+main{max-width:76ch;margin:0 auto;padding:30px 18px 60px}
+h1{font:800 2.1rem/1.12 system-ui;margin:.3em 0 .1em;letter-spacing:-.02em}
+h1 em{color:var(--accent);font-style:normal}
+h2{font:700 1.08rem/1.3 system-ui;margin:2em 0 .5em;color:var(--accent)}
+.kicker{font:600 12px/1.5 system-ui;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.lede{font-size:1.05rem;color:var(--muted)}
+a{color:var(--accent-2)}
+code{font:13px/1.6 ui-monospace,Consolas,monospace;background:var(--mono-bg);border-radius:4px;padding:1px 5px}
+.law{background:var(--mono-bg);border-left:3px solid var(--accent);border-radius:6px;padding:12px 16px;font:13px/1.7 ui-monospace,Consolas,monospace;overflow-x:auto;white-space:pre-wrap}
+.demo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:1.2em 0}
+.demo h3{margin:0 0 4px;font:600 .98rem system-ui;color:var(--accent)}
+.demo p{font-size:13px;color:var(--muted);margin:.3em 0 .9em}
+button{font:600 13px system-ui;background:var(--accent);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;cursor:pointer;margin-right:6px}
+button:hover{background:var(--accent-2)}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+textarea{width:100%;min-height:120px;font:12.5px/1.5 ui-monospace,Consolas,monospace;background:var(--mono-bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+label{display:flex;gap:6px;align-items:center;font:13px system-ui;color:var(--muted);margin:8px 0}
+.out{font:12.5px/1.65 ui-monospace,Consolas,monospace;background:var(--mono-bg);border-radius:8px;padding:10px 12px;margin-top:10px;overflow-x:auto;min-height:1.4em;white-space:pre-wrap}
+footer{border-top:1px solid var(--line);margin-top:44px;padding-top:16px;font:12px/1.7 system-ui;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="banner">the wiring law · witness 40/44 + 4 argued, CLEAN · it eats its own cooking</div>
+<main>
+<p class="kicker">witness-kit · for any team that ships tests</p>
+<h1>Wire a mutation gate — <em>honestly</em></h1>
+<p class="lede">A green suite proves your tests ran. A clean mutation gate proves your tests would
+<strong>notice if the code were wrong</strong>. This kit wires that proof into your CI with three
+rules earned across a hundred gated repos: <em>pin the gate · read the verdict · kill or argue,
+never shrug</em> — and it refuses to wire anything where the proof would be theatre.</p>
+
+<h2>The three honest answers</h2>
+<div class="law">LANE A    kernel/test pairs found → each proven CLEAN locally with the EXACT pinned
+          invocation → a workflow that tees every verdict and greps '"clean": true' —
+          anything less fails the build. You review, you push.
+LANE B    you already mutate (Stryker & co) → belief installed; the missing piece is
+          discipline: pin the tool, set a breaking threshold, make CI READ the score.
+          A gate that reports and exits zero is decorative.
+THEATRE   nothing to mutate, no mutator → REFUSED, with directions: extract one pure
+          function with a falsifiable test first. The gate follows the kernel.</div>
+
+<div class="demo">
+<h3>Try the law on your repo — right here</h3>
+<p>Paste the output of <code>git ls-files</code> (nothing uploads — the kernel runs in this page).
+Tick ESM if your package.json says <code>"type": "module"</code>.</p>
+<textarea id="listing" spellcheck="false" placeholder="README.md
+src/parser.mjs
+src/parser.test.mjs
+stryker.config.json
+…"></textarea>
+<label><input type="checkbox" id="esm" style="width:auto"> this repo is ESM ("type": "module")</label>
+<div>
+<button id="planBtn">detect + plan</button>
+<button id="wfBtn" class="ghost">preview the workflow</button>
+</div>
+<div class="out" id="planOut">the plan will speak here</div>
+</div>
+
+<h2>Then wire it for real</h2>
+<div class="law">git clone https://github.com/sjgant80-hub/witness-kit
+node witness-kit/wire.mjs /path/to/your/repo</div>
+<p>The wire proves every pair against the pinned invocation <em>before</em> writing a workflow —
+a gate is never shipped on a local approximation. Survivors block it: kill each at source, or
+argue it in a baseline with a sentence a reviewer could dispute. Your repo, your push.</p>
+
+<footer>
+<p>The kit's own kernel is mutation-gated (40/44 killed + 4 argued equivalents, the arguments in
+the baseline). Built on the Konomi architecture, created by Thomas Frumkin. MIT.</p>
+</footer>
+</main>
+<script>
+/*__KERNEL_START__*/
+// witness-kit · kit.mjs — THE WIRING LAW: witness into a stranger's repo, honestly.
+//
+// The one move the estate has never made is landing its gate in an EXTERNAL team's CI. This
+// kit makes that a paste — and refuses to fake it where it would be theatre. Three laws:
+//
+//   · DETECT — from a file listing, find what witness can actually mutate (X.mjs + X.test.mjs
+//     pairs; .js pairs only when the repo is ESM), what tests exist without kernels, and
+//     whether the repo ALREADY runs a mutator (Stryker & co — belief already installed).
+//   · PLAN   — the honest lane: A = wire witness (pairs exist); B = the repo already mutates,
+//     so the estate's contribution is the DISCIPLINE (pin the tool, make CI read the score
+//     and refuse below threshold — a gate that reports and exits zero is decorative);
+//     THEATRE = nothing to mutate and no mutator: refuse, and say what to extract first.
+//   · GENERATE — the pinned, verdict-reading workflow: witness cloned at a TAG (an unpinned
+//     gate is a gate somebody else can change), one verdict file per kernel, CI greps
+//     '"clean": true' for EVERY one — the lessons of ninety-odd gated repos, compiled.
+//
+// Plus VERDICT — parse a witness run from its WHOLE output (some modes print the JSON last,
+// some print prose after; judging by the last line once mis-read "}" as the verdict).
+//
+// Pure and total: garbage in → { ok:false, why }, never a throw mid-wire.
+
+const S = (v) => (typeof v === 'string' ? v : '');
+
+const MUTATOR_CONFIGS = ['stryker.config.json', 'stryker.config.js', 'stryker.config.mjs', 'stryker.conf.js', '.mutmut.toml', 'infection.json', 'infection.json5'];
+
+/**
+ * DETECT — files: repo-relative paths ('/' separators). esm: does package.json say
+ * "type":"module" (the shell reads that; this law stays pure). Depth ≤ 2 (root + one
+ * directory) — deeper trees hide generated code and vendored noise.
+ */
+function detect(files, esm) {
+  if (!Array.isArray(files) || files.length === 0 || !files.every((f) => S(f).length > 0))
+    return { ok: false, why: 'a file listing is required — run `git ls-files` and bring the output' };
+  if (typeof esm !== 'boolean') return { ok: false, why: 'esm must be a boolean — the shell reads package.json "type"' };
+  const depth = (f) => f.split('/').length - 1;
+  const inScope = files.filter((f) => depth(f) <= 2 && !f.includes('node_modules/') && !f.startsWith('.git/'));
+  const isKernelExt = (f) => f.endsWith('.mjs') || (esm && f.endsWith('.js'));
+  const testOf = (f) => f.replace(/\.(mjs|js)$/, '.test.$1');
+  const pairs = [], loneKernels = [], loneTests = [];
+  for (const f of inScope) {
+    if (!isKernelExt(f) || /\.test\.(mjs|js)$/.test(f)) continue;
+    if (/(^|\/)(build|wire|scripts?\/)/.test(f) || /build-page/.test(f)) continue;
+    const t = testOf(f);
+    if (inScope.includes(t)) pairs.push({ kernel: f, test: t });
+    else loneKernels.push(f);
+  }
+  for (const f of inScope) {
+    if (/\.test\.(mjs|js)$/.test(f) && !pairs.some((p) => p.test === f)) loneTests.push(f);
+  }
+  const mutators = inScope.filter((f) => MUTATOR_CONFIGS.includes(f.split('/').pop()));
+  const testRunners = inScope.filter((f) => /^(vitest|jest|karma|ava)\.config\.[a-z]+$/.test(f.split('/').pop() || ''));
+  return { ok: true, pairs, loneKernels, loneTests, mutators, testRunners };
+}
+
+/** PLAN — the honest lane, named. Never a gate where a gate would be theatre. */
+function plan(detection) {
+  const d = detection && typeof detection === 'object' && !Array.isArray(detection) ? detection : null;
+  if (!d || !Array.isArray(d.pairs) || !Array.isArray(d.mutators)) return { ok: false, why: 'pass detect() output' };
+  const notes = [];
+  if (Array.isArray(d.loneKernels) && d.loneKernels.length) notes.push(d.loneKernels.length + ' kernel-shaped file(s) have no sibling test — witness cannot judge what nothing exercises: ' + d.loneKernels.slice(0, 3).join(', ') + (d.loneKernels.length > 3 ? '…' : ''));
+  if (Array.isArray(d.loneTests) && d.loneTests.length) notes.push(d.loneTests.length + ' test file(s) have no sibling kernel by name — if they test something real, tell the wire where it lives');
+  if (d.pairs.length > 0) {
+    return { ok: true, lane: 'A', notes,
+      say: 'LANE A — wire witness: ' + d.pairs.length + ' kernel/test pair(s) it can mutate. The wire proves each CLEAN locally with the EXACT pinned invocation before any workflow ships; survivors are killed at source or argued in a baseline — a sentence you could argue with, never a flag.' };
+  }
+  if (d.mutators.length > 0) {
+    return { ok: true, lane: 'B', notes,
+      say: 'LANE B — this repo already mutates (' + d.mutators.join(', ') + '), so belief is installed; what the estate adds is the DISCIPLINE: pin the mutator version, set a breaking threshold, and make CI READ the score and refuse below it. A gate that reports and exits zero is decorative. No rip-and-replace.' };
+  }
+  return { ok: false, lane: 'THEATRE',
+    why: 'no kernel/test pairs witness can mutate and no existing mutator — a gate here would be theatre. Start smaller: extract ONE pure function into its own module with a falsifiable test, then wire that. The gate follows the kernel, never the other way round.' };
+}
+
+/**
+ * GENERATE — the pinned, verdict-reading workflow for lane A. One verdict file per pair;
+ * every verdict grepped; test step runs every suite first.
+ */
+function workflowFor(pairs, tag = 'v0.6') {
+  if (!Array.isArray(pairs) || pairs.length === 0) return { ok: false, why: 'no pairs — a workflow over nothing is theatre, refused' };
+  for (const p of pairs) {
+    if (!p || !S(p.kernel) || !S(p.test)) return { ok: false, why: 'each pair is { kernel, test }' };
+  }
+  if (!/^v\d+\.\d+$/.test(tag)) return { ok: false, why: 'tag must look like v0.6 — an unpinned gate is a gate somebody else can change' };
+  const tests = pairs.map((p) => p.test).join(' ');
+  let steps = '';
+  pairs.forEach((p, i) => {
+    steps += `      - name: witness — try to break ${p.kernel}, then READ the verdict (must be CLEAN)
+        run: |
+          ${i === 0 ? `git clone --depth 1 --branch ${tag} https://github.com/sjgant80-hub/witness.git /tmp/witness\n          ` : ''}node /tmp/witness/witness.mjs mutate ${p.kernel} \\
+            --timeout 60000 --cap 800 $([ -f witness.baseline.json ] && echo "--baseline witness.baseline.json") \\
+            --test node --test ${p.test} | tee verdict-${i}.txt
+          grep -q '"clean": true' verdict-${i}.txt || { echo "::error::${p.kernel}: mutants survived — the gate is not clean"; exit 1; }
+`;
+  });
+  const yml = `name: proof-of-play
+# ⚑ Pinned at ${tag}. An unpinned gate is a gate somebody else can change.
+# A verdict nobody reads is decoration: every witness run below is tee'd and grepped —
+# anything short of '"clean": true' fails the build, by design.
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: the tests themselves, before anything is mutated
+        run: node --test ${tests}
+${steps}`;
+  return { ok: true, yml };
+}
+
+/**
+ * VERDICT — parse one witness run from its WHOLE output: the verdict is the LAST balanced
+ * JSON object that carries a "clean" key. Prose before or after is ignored; a run with no
+ * verdict anywhere is named, never guessed.
+ */
+function verdictOf(output) {
+  if (!S(output)) return { ok: false, why: 'no output — the run produced nothing to judge' };
+  const at = output.lastIndexOf('"clean"');
+  if (at < 0) return { ok: false, why: 'no verdict in the output — witness never finished; judge nothing' };
+  let start = output.lastIndexOf('{', at);
+  while (start >= 0) {
+    let depth = 0, end = -1;
+    for (let i = start; i < output.length; i++) {
+      const c = output[i];
+      if (c === '{') depth++;
+      else if (c === '}') { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (end > at) {
+      try {
+        const o = JSON.parse(output.slice(start, end + 1));
+        if (typeof o.clean === 'boolean') {
+          return { ok: true, clean: o.clean, killed: o.killed ?? null, total: o.total ?? null,
+            survived: Array.isArray(o.survived) ? o.survived.length : 0 };
+        }
+      } catch { /* widen and retry */ }
+    }
+    start = output.lastIndexOf('{', start - 1);
+  }
+  return { ok: false, why: 'a "clean" key exists but no balanced JSON verdict around it — the output is mangled; rerun rather than guess' };
+}
+
+window.KIT = { detect, plan, workflowFor, verdictOf };
+/*__KERNEL_END__*/
+(function(){
+  const K=window.KIT;
+  const read=()=>{
+    const files=document.getElementById('listing').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    return {files, esm:document.getElementById('esm').checked};
+  };
+  document.getElementById('planBtn').addEventListener('click',()=>{
+    const {files,esm}=read();
+    const d=K.detect(files,esm);
+    const out=document.getElementById('planOut');
+    if(!d.ok){out.textContent='REFUSED: '+d.why;return}
+    const p=K.plan(d);
+    out.textContent=(p.say||('THEATRE — '+p.why))+
+      (p.notes&&p.notes.length?'\n\n'+p.notes.map(n=>'  · '+n).join('\n'):'')+
+      '\n\npairs: '+(d.pairs.map(x=>x.kernel).join(', ')||'—')+
+      (d.mutators.length?'\nexisting mutator: '+d.mutators.join(', '):'');
+  });
+  document.getElementById('wfBtn').addEventListener('click',()=>{
+    const {files,esm}=read();
+    const d=K.detect(files,esm);
+    const out=document.getElementById('planOut');
+    if(!d.ok){out.textContent='REFUSED: '+d.why;return}
+    const w=K.workflowFor(d.pairs);
+    out.textContent=w.ok?w.yml:'REFUSED: '+w.why;
+  });
+})();
+</script>
+</body>
+</html>

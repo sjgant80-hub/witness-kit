@@ -1,0 +1,26 @@
+[
+  {
+    "line": 130,
+    "mutation": "> → >=",
+    "snippet": "if (end > at) {",
+    "reason": "equivalent by type: end indexes a closing brace and at indexes the opening quote of \"clean\" — one index cannot hold both characters, so > and >= agree on every real string"
+  },
+  {
+    "line": 125,
+    "mutation": "< → <=",
+    "snippet": "for (let i = start; i < output.length; i++) {",
+    "reason": "equivalent: the loop bound reads one index past the string end, where indexing yields undefined — undefined matches neither brace, so the extra iteration observes nothing"
+  },
+  {
+    "line": 57,
+    "mutation": "&& → ||",
+    "snippet": "const d = detection && typeof detection === 'object' && !Array.isArray(detection) ? detect",
+    "reason": "equivalent by subsumption: the ternary guard is fully re-checked by the field validations on the next line (!d and !Array.isArray(d.pairs)) — every mutated path lands in the same named refusal"
+  },
+  {
+    "line": 57,
+    "mutation": "&& → ||",
+    "snippet": "const d = detection && typeof detection === 'object' && !Array.isArray(detection) ? detect",
+    "reason": "equivalent by subsumption: the ternary guard is fully re-checked by the field validations on the next line (!d and !Array.isArray(d.pairs)) — every mutated path lands in the same named refusal"
+  }
+]
