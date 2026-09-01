@@ -100,6 +100,13 @@ test('GENERATE — the workflow is pinned, runs tests first, and reads EVERY ver
   // the generated SHELL is behavior too: the baseline ride-along and the refuse-clause are exact
   assert.match(w.yml, /\] && echo "--baseline witness\.baseline\.json"/, 'the baseline hook is a shell AND, verbatim');
   assert.match(w.yml, /verdict-0\.txt \|\| \{ echo "::error::/, 'the verdict grep FAILS the build with a shell OR, verbatim');
+  // the bell step: every verdict becomes a link that rings it, ON FAILURE TOO — hearing the
+  // crack is the point, so the step runs always() and the link carries the verdict by fragment
+  assert.match(w.yml, /if: always\(\)/, 'the bell rings cracked gates too');
+  assert.match(w.yml, /the-bell\/#v=\$\(tail -c 2000 "\$f" \| base64 -w0\)/, 'the verdict travels in the fragment — no server ever sees it');
+  assert.match(w.yml, /GITHUB_STEP_SUMMARY/, 'the link lands in the job summary where a human will see it');
+  assert.match(w.yml, /\[ -f "\$f" \] \|\| continue/, 'a missing verdict file is skipped, not exploded on');
+  assert.ok(w.yml.indexOf('the bell') > w.yml.indexOf('verdict-1.txt'), 'the bell tolls after every gate has spoken');
 });
 
 test('VERDICT — judged from the WHOLE output: prose after JSON, prefixed noise, baseline shapes', () => {

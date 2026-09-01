@@ -106,7 +106,16 @@ jobs:
         with: { node-version: "20" }
       - name: the tests themselves, before anything is mutated
         run: node --test ${tests}
-${steps}`;
+${steps}      # The gate you can HEAR: each verdict becomes a link that rings it — a clean gate
+      # peals true, survivors crack the bell. Runs on failure too; hearing the crack is the point.
+      - name: 🔔 the bell — hear every verdict
+        if: always()
+        run: |
+          for f in verdict-*.txt; do
+            [ -f "$f" ] || continue
+            echo "🔔 [$f rings here](https://sjgant80-hub.github.io/the-bell/#v=$(tail -c 2000 "$f" | base64 -w0))" >> "$GITHUB_STEP_SUMMARY"
+          done
+`;
   return { ok: true, yml };
 }
 
