@@ -1,0 +1,68 @@
+{
+  "genome": "1",
+  "name": "witness-kit",
+  "kind": "repo",
+  "purpose": "Wires a mutation gate into a repository honestly: finds the kernel and test pairs it can gate, names the lane (wire it, add discipline to an existing mutator, or refuse as theatre) and writes the pinned workflow.",
+  "lane": {
+    "id": "repo-gate-wiring",
+    "accepts": "a repository's file listing (as git ls-files prints it) and whether the repository is an ES module package",
+    "refuses": "a request with no file listing, such as 'add a gate to my project' on its own"
+  },
+  "interface": {
+    "in": "{files, esm}: repo-relative paths and a boolean; to judge, a claim: the lane A, B or THEATRE",
+    "out": "the lane with its reason and notes, and for lane A a pinned workflow that reads every verdict"
+  },
+  "judge": {
+    "what": "a claimed lane for a repository is right when witness-kit's own detect() and plan() name the same lane for that file listing",
+    "run": "node genome/judge.mjs",
+    "cases": {
+      "good": {
+        "files": [
+          "README.md",
+          "index.html",
+          "style.css"
+        ],
+        "esm": false,
+        "claim": "THEATRE"
+      },
+      "bad": {
+        "files": [
+          "README.md",
+          "index.html",
+          "style.css"
+        ],
+        "esm": false,
+        "claim": "A"
+      }
+    }
+  },
+  "boundary": {
+    "run": "node genome/lane.mjs",
+    "inLane": {
+      "files": [
+        "README.md",
+        "room.mjs",
+        "room.test.mjs",
+        "lib/law.mjs",
+        "lib/law.test.mjs"
+      ],
+      "esm": false
+    },
+    "outOfLane": {
+      "request": "add a mutation gate to my project"
+    },
+    "escalate": "kar"
+  },
+  "health": {
+    "run": "node genome/health.mjs"
+  },
+  "tombstone": {
+    "apply": "node genome/tombstone.mjs apply",
+    "restore": "node genome/tombstone.mjs restore"
+  },
+  "provenance": {
+    "repo": "sjgant80-hub/witness-kit",
+    "by": "Kar, for Simon Gant",
+    "born": "2026-11-21"
+  }
+}

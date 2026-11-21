@@ -2,6 +2,8 @@
 
 **LIVE: https://sjgant80-hub.github.io/witness-kit/**
 
+This repository is a cell of the [estate genome](https://sjgant80-hub.github.io/estate-genome/): its `seed.json` and `genome/` hooks pass the four-trait birth check on every push.
+
 One command turns a repo with real kernels and real tests into a repo whose CI **proves its
 tests would notice if the code were wrong** — and refuses to fake it anywhere that proof
 isn't possible.

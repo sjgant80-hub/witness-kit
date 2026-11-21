@@ -15,6 +15,12 @@ jobs:
           git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness
           node /tmp/witness/witness.mjs mutate kit.mjs             --timeout 60000 --cap 800 $([ -f witness.baseline.json ] && echo "--baseline witness.baseline.json")             --test node --test kit.test.mjs | tee verdict.txt
           grep -q '"clean": true' verdict.txt || { echo "::error::mutants survived — the gate is not clean"; exit 1; }
+      - name: genome tests (the birth check's judge, lane and health)
+        run: node --test genome.test.mjs
+      - name: witness — genome/cell.mjs must be CLEAN, with no exemptions
+        run: |
+          node /tmp/witness/witness.mjs mutate genome/cell.mjs --cap 100000 --timeout 60000 --test node --test genome.test.mjs | tee genome.out
+          node -e "const j=JSON.parse(require('fs').readFileSync('genome.out','utf8'));if(j.clean!==true||j.ignored.length){console.error('GENOME GATE NOT CLEAN');process.exit(1)}console.log('CLEAN '+j.killed+'/'+j.total)"
       - name: the live page still carries the gated law (no drift)
         run: |
           cp index.html /tmp/shipped.html
